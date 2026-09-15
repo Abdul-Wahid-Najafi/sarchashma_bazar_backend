@@ -23,8 +23,10 @@ return new class extends Migration
             $table->string('password')->nullable();
             $table->string('profile_picture')->nullable();
             $table->boolean('is_seller')->default(false);
-            
+            $table->boolean('is_shop_profile_complete')->default(false);
+            $table->boolean('is_personal_profile_complete')->default(false);
             $table->enum('status', ['active', 'banned'])->default('active');
+            $table->timestamp('last_seen_at')->nullable();
 
             $table->timestamps();
             $table->softDeletes();
@@ -40,7 +42,5 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('users');
-        Schema::dropIfExists('password_reset_tokens');
-        Schema::dropIfExists('sessions');
     }
 };

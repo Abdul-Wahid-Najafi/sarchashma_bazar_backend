@@ -17,14 +17,13 @@ class UserFactory extends Factory
             'email' => fake()->unique()->safeEmail(),
             'phone_number' => fake()->unique()->phoneNumber(),
             'whatsapp' => fake()->phoneNumber(),
-            'password' => static::$password ??= Hash::make('password'),
+            'password' => "1234567890",
             'profile_picture' => fake()->imageUrl(200, 200, 'users'),
-            'is_seller' => false, // به صورت پیش‌فرض خریدار است
+            'is_seller' => false, 
             'status' => 'active',
         ];
     }
 
-    // حالت اختصاصی برای زمانی که می‌خواهیم کاربر حتماً فروشنده باشد
     public function seller(): static
     {
         return $this->state(fn (array $attributes) => [

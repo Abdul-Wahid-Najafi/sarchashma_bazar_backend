@@ -27,6 +27,7 @@ class UpdateProfileAction
 
         
             unset($data['shop_name']); 
+             $data['is_personal_profile_complete'] = true;
 
             $user->update($data);
 
@@ -37,6 +38,7 @@ class UpdateProfileAction
                         'shop_name' => $shopName,
                         'slug'      => Str::slug($shopName) ?: Str::random(8), // ساخت اسلاگ خودکار
                         'whatsapp'  => $user->whatsapp,
+                        'province_id'=>1
                     ]
                 );
             }

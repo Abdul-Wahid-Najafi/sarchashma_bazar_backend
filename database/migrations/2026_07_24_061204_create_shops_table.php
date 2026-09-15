@@ -13,8 +13,10 @@ return new class extends Migration
             
             $table->foreignId('user_id')
                 ->unique()
-                ->constrained('users')
-                ->cascadeOnDelete();
+                ->constrained('users');
+            $table->foreignId('province_id')
+                ->constrained('provinces');
+                
 
             $table->string('shop_name');
             $table->string('slug')->unique();
@@ -26,8 +28,10 @@ return new class extends Migration
             
             $table->string('logo')->nullable();
             $table->string('cover_image')->nullable();
+            $table->string('status')->default('active');
             
             $table->boolean('is_verified')->default(false);
+            
 
             $table->timestamps();
             $table->softDeletes();

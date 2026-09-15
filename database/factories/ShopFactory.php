@@ -5,6 +5,7 @@ namespace Database\Factories;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
+use App\Models\Province;
 
 class ShopFactory extends Factory
 {
@@ -14,7 +15,8 @@ class ShopFactory extends Factory
         return [
             // ایجاد یک کاربر با وضعیت فروشنده و متصل کردن آن
             'user_id' => User::factory()->seller(), 
-            'shop_name' => $shopName,
+            'shop_name' => $this->faker->company() . ' Bazar', 
+            'province_id' => Province::inRandomOrder()->first()?->id ?? 1, 
             'slug' => Str::slug($shopName),
             'description' => fake()->paragraph(),
             'contact_number' => fake()->phoneNumber(),

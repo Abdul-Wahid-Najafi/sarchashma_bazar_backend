@@ -4,6 +4,8 @@ namespace App\Http\Resources\Api;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Storage;
+use App\Http\Resources\Api\Shop\ShopResource;
 
 class UserResource extends JsonResource
 {
@@ -14,23 +16,16 @@ class UserResource extends JsonResource
             'firstName'      => $this->first_name,
             'lastName'       => $this->last_name,
             'email'          => $this->email,
-            'password'          => $this->password,
             'phoneNumber'    => $this->phone_number,
             'whatsapp'       => $this->whatsapp,
             'isSeller'       => $this->is_seller,
-            'profilePicture' => $this->profile_picture,
-            
-            'shop'           => $this->whenLoaded('shop', function() {
-                return [
-                    'id'       => $this->shop->id,
-                    'shopName' => $this->shop->shop_name,
-                    'slug'     => $this->shop->slug,
-                ];
-            }) ?? ($this->shop ? [
-                'id'       => $this->shop->id,
-                'shopName' => $this->shop->shop_name,
-                'slug'     => $this->shop->slug,
-            ] : null),
+            'is_shop_profile_complete' => $this->is_shop_profile_complete,
+            'is_personal_profile_complete' => $this->is_personal_profile_complete,
+            'profilePicture' => $this->profile_picture
+                ? Storage::disk('public')->url($this->profile_picture)
+                : null,
+
+            'shop' => new ShopResource($this->whenLoaded('shop')),
         ];
     }
 }

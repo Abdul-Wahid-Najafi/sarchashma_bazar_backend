@@ -12,15 +12,14 @@ return new class extends Migration
             $table->id();
             
             $table->foreignId('user_id')
-                ->constrained('users')
-                ->cascadeOnDelete();
+                ->constrained('users');
 
             $table->string('provider'); // google, apple
             $table->string('provider_id');
             
             
             $table->timestamps();
-            $table->unique(['provider', 'provider_id']);
+            $table->softDeletes();
         });
     }
 

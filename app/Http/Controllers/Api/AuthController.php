@@ -27,26 +27,30 @@ class AuthController extends Controller
         $code = $action->execute($request->validated('identifier'));
 
         return response()->json([
-            'message' => 'Verfication code send to your email',
+            'message' => 'Verification code sent to your email',
             'code'    => $code 
         ]);
     }
 
-    public function verifyOtp(VerifyOtpRequest $request, VerifyOtpAction $action): JsonResponse
-    {
-        $user = $action->execute(
-            $request->validated('identifier'),
-            $request->validated('code')
-        );
 
-        $token = $user->createToken('auth_token')->plainTextToken;
+public function verifyOtp(VerifyOtpRequest $request, VerifyOtpAction $action): JsonResponse
+{
+    // دریافت اطلاعات ولیدیت شده از ریکوئست
+    $user = $action->execute(
+        $request->input('identifier'),
+        $request->input('code')
+    );
 
-        return response()->json([
-            'message' => 'Code verfied',
-            'token'   => $token,
-            'user'    => new UserResource($user)
-        ]);
-    }
+    // ساخت توکن جدید Sanctum برای فلاتر
+    $token = $user->createToken('auth_token')->plainTextToken;
+
+    return response()->json([
+        'message' => 'Code verified',
+        'token'   => $token,
+        'user'    => new UserResource($user) // نگاشت مستقیم اطلاعات به قالب فلاتر
+    ]);
+}
+
 
     public function updateProfile(UpdateProfileRequest $request, UpdateProfileAction $action): JsonResponse
     {
@@ -62,39 +66,59 @@ class AuthController extends Controller
     }
 
 
-    public function googleLogin(GoogleLoginRequest $request, HandleGoogleLoginAction $action): JsonResponse
-    {
+    public function googleLogin(
+        GoogleLoginRequest $request,
+        HandleGoogleLoginAction $action
+    ): JsonResponse {
+
         info('My Request Data_gogole:', $request->all());
+
         $user = $action->execute(
-                $request->validated()['id_token']
-            );
+            $request->validated()['id_token']
+        );
+
+        $user->load([
+            'shop.user',
+            'shop.province.country',
+            'shop.services',
+            'shop.socialAccounts.socialIcon',
+        ]);
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
             'message' => 'Login with google was successfully',
             'token'   => $token,
-            'user'    => new UserResource($user)
+            'user'    => new UserResource($user),
         ]);
     }
 
 
-    public function loginWithEmail(LoginRequest $request, LoginWithEmailAction $action): JsonResponse
-    {
-        $user = $action->execute(
-            $request->validated('email'),
-            $request->validated('password')
-        );
+public function loginWithEmail(
+    LoginRequest $request,
+    LoginWithEmailAction $action
+): JsonResponse {
 
-        $user->load('shop');
-        $token = $user->createToken('auth_token')->plainTextToken;
+    $user = $action->execute(
+        $request->validated('email'),
+        $request->validated('password')
+    );
 
-        return response()->json([
-            'message' => 'Login was succesfully',
-            'token'   => $token,
-            'user'    => new UserResource($user)
-        ]);
-    }
+    $user->load([
+        'shop.user',
+        'shop.province.country',
+        'shop.services',
+        'shop.socialAccounts.socialIcon',
+    ]);
+
+    $token = $user->createToken('auth_token')->plainTextToken;
+
+    return response()->json([
+        'message' => 'Login was succesfully',
+        'token'   => $token,
+        'user'    => new UserResource($user),
+    ]);
+}
 
     public function logout(Request $request): JsonResponse
     {

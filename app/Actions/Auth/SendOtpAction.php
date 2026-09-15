@@ -10,7 +10,6 @@ class SendOtpAction
 {
     public function execute(string $identifier): int
     {
-        
         $lastOtp = Otp::where('identifier', $identifier)
             ->where('is_used', false)
             ->where('created_at', '>', Carbon::now()->subMinute())
@@ -21,11 +20,9 @@ class SendOtpAction
                 'identifier' => ['please with 1 minute'],
             ]);
         }
+        Otp::where('identifier', $identifier)->forceDelete();
 
-        Otp::where('identifier', $identifier)
-            ->delete();
-
-        $code = 123456;//mt_rand(100000, 999999);
+        $code = 123456; // mt_rand(100000, 999999);
 
         Otp::create([
             'identifier' => $identifier,

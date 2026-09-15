@@ -12,10 +12,6 @@ class VerifyOtpAction
 {
     public function execute(string $identifier, string $code): User
     {
-         Log::info('VerifyOtpAction Started', [
-            'identifier' => $identifier,
-            'code' => $code
-        ]);
        
         $otp = Otp::isValid($identifier, $code)->first();
 
@@ -27,19 +23,32 @@ class VerifyOtpAction
 
         $otp->update(['is_used' => true]);
 
-        $field = filter_var($identifier, FILTER_VALIDATE_EMAIL) ? 'email' : 'phone_number';
+        $isEmail = filter_var($identifier, FILTER_VALIDATE_EMAIL);
+        $field = $isEmail ? 'email' : 'phone_number';
 
-        $user = User::firstOrCreate(
-            [$field => $identifier],
-            ['status' => UserStatus::ACTIVE->value]
-        );
+        $user = User::withTrashed()->where($field, $identifier)->first();
+         
+        if ($user) {
+            if ($user->trashed()) {
+                $user->restore(); 
+                $user->update(['status' => UserStatus::ACTIVE->value]);
+            }
+        } else {
+           
+            $user = User::forceCreate([
+                'email'        => $isEmail ? $identifier : null,
+                'phone_number' => !$isEmail ? $identifier : null,
+                'status'       => UserStatus::ACTIVE->value
+            ]);
+
+        }
 
         if ($user->status === UserStatus::BANNED->value) {
             throw ValidationException::withMessages([
                 'identifier' => ['your account is banned'],
             ]);
         }
-
+        $user->refresh();
         return $user;
     }
 }
